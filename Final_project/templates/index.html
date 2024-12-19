@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Color Recognition and Upload</title>
+<style>
+body {
+font-family: Arial, sans-serif;
+margin: 0;
+padding: 0;
+background-color: #f4f4f4;
+color: #333;
+text-align: center; /* Center everything */
+display: flex;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+min-height: 100vh; /* Allow page to grow */
+overflow: auto; /* Enable scrolling if needed */
+}
+
+header {
+background-color: #333;
+color: white;
+padding: 10px 20px;
+width: 100%;
+box-sizing: border-box;
+}
+
+h1 {
+font-size: 2rem;
+}
+
+h2 {
+font-size: 1.5rem;
+}
+
+#uploaded-image {
+max-width: 80%;
+height: auto;
+cursor: pointer;
+border: 2px solid #ccc;
+border-radius: 8px;
+margin-top: 20px;
+}
+
+.instructions {
+background-color: #fff;
+padding: 20px;
+margin: 20px;
+border-radius: 8px;
+box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+width: 80%;
+box-sizing: border-box;
+text-align: left;
+}
+
+.color-box {
+display: inline-block;
+width: 50px;
+height: 50px;
+margin-right: 10px;
+vertical-align: middle;
+}
+
+footer {
+background-color: #333;
+color: white;
+padding: 10px;
+text-align: center;
+position: fixed; /* Fix the footer at the bottom */
+bottom: 0;
+width: 100%;
+left: 0;
+}
+
+form {
+margin-top: 20px;
+margin-bottom: 20px;
+}
+
+button {
+padding: 10px 20px;
+font-size: 1rem;
+background-color: #333;
+color: white;
+border: none;
+border-radius: 5px;
+cursor: pointer;
+}
+
+button:hover {
+background-color: #444;
+}
+</style>
+
+</head>
+<body>
+<header>
+<h1>Color Recognition and Upload Application</h1>
+<p>Upload an image, click on a color in the image, and view its complementary color.</p>
+</header>
+
+<div class="instructions">
+<h2>How to Use?</h2>
+<ul>
+<li><strong>Upload Image:</strong> Select an image you want to upload.</li>
+<li><strong>Pick a Color:</strong> Click on any spot in the uploaded image.</li>
+<li><strong>Color Information:</strong> View the RGB value of the selected color and its complementary color.</li>
+</ul>
+</div>
+
+<form method="POST" enctype="multipart/form-data">
+    <label for="imageUpload">Choose Image:</label>
+    <input type="file" id="imageUpload" name="image" accept="image/*" placeholder="Select an image">
+    <button type="submit">Upload</button>
+</form>
+
+{% if message %}
+<p>{{ message }}</p>
+{% endif %}
+
+{% if image_url %}
+<h2>Uploaded Image:</h2>
+<img id="uploaded-image" src="{{ url_for('static', filename=image_url) }}" alt="Uploaded Image" onclick="getPixelColor(event)">
+{% else %}
+<p>No file selected. Please choose an image to upload.</p>
+{% endif %}
+
+<div class="instructions">
+<h2>Selected Color and Complementary Color:</h2>
+<p id="color-info"></p>
+<p id="complementary-color-info"></p>
+</div>
+
+<footer>
+<p>&copy; 2024 Color Recognition and Upload Application</p>
+</footer>
+
+<script>
+function getPixelColor(event) {
+var img = document.getElementById('uploaded-image');
+var canvas = document.createElement('canvas');
+var ctx = canvas.getContext('2d');
+
+// Draw image on canvas
+canvas.width = img.width;
+canvas.height = img.height;
+ctx.drawImage(img, 0, 0, img.width, img.height);
+
+// Get pixel coordinates
+var x = event.offsetX;
+var y = event.offsetY;
+
+// Get pixel RGB value
+var pixel = ctx.getImageData(x, y, 1, 1).data;
+var rgb = 'rgb(' + pixel[0] + ',' + pixel[1] + ',' + pixel[2] + ')';
+
+// Calculate complementary color
+var complementaryColor = 'rgb(' + (255 - pixel[0]) + ',' + (255 - pixel[1]) + ',' + (255 - pixel[2]) + ')';
+
+// Display color information
+document.getElementById('color-info').textContent = "Selected color: " + rgb;
+document.getElementById('complementary-color-info').textContent = "Complementary color: " + complementaryColor;
+
+// Display color boxes
+var colorBox = document.createElement('div');
+colorBox.classList.add('color-box');
+colorBox.style.backgroundColor = rgb;
+document.getElementById('color-info').appendChild(colorBox);
+
+var complementaryColorBox = document.createElement('div');
+complementaryColorBox.classList.add('color-box');
+complementaryColorBox.style.backgroundColor = complementaryColor;
+document.getElementById('complementary-color-info').appendChild(complementaryColorBox);
+}
+</script>
+</body>
+</html>
